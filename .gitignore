@@ -1,0 +1,16 @@
+# frontend
+*.log*
+frontend/.nuxt/
+frontend/dist/
+frontend/node_modules/
+
+# go
+go.sum
+vendor/
+*.exe
+godp
+
+.idea/
+out/
+
+config_local.yaml

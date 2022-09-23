@@ -1,0 +1,11 @@
+
+app:
+  cross_origin: "*"
+  work_path: /etc/godp/work
+
+mysql:
+  host: 127.0.0.1
+  port: 13306
+  database: godp
+  username: root
+  password: godp@1234

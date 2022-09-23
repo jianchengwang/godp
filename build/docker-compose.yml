@@ -1,0 +1,27 @@
+version: '3'
+services:
+  mysql:
+    restart: always
+    image: mysql:5.7.27
+    container_name: mysql
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_INITDB_SKIP_TZINFO
+      - MYSQL_ROOT_PASSWORD=godp@1234
+    ports:
+      - 13306:3306
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/config:/etc/mysql/conf.d
+      - ./mysql/init.d:/docker-entrypoint-initdb.d
+
+  godp:
+    image: godp:v0.0.1
+    ports:
+      - "8081:8081"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/etc/godp/config
+      - ./work:/etc/godp/work
+    environment:
+      APP_ENV: "prod"
