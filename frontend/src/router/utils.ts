@@ -20,7 +20,7 @@ const modulesRoutes = import.meta.glob("/src/views/**/*.{vue,tsx}");
 
 // 动态路由
 import { getAsyncRoutes } from "/@/api/routes";
-import { projectRouter } from "/@/router/modules/business";
+import { assetsHostRouter } from "/@/router/modules/business";
 
 /** 按照路由中meta下的rank等级升序来排序路由 */
 function ascending(arr: any[]) {
@@ -151,7 +151,7 @@ function initRouter(name: string) {
     //   addPathMatch();
     // });
 
-    const info = [projectRouter];
+    const info = [assetsHostRouter];
     if (info.length === 0) {
       usePermissionStoreHook().changeSetting(info);
     } else {
@@ -169,9 +169,13 @@ function initRouter(name: string) {
           // 最终路由进行升序
           ascending(router.options.routes[0].children);
           if (!router.hasRoute(v?.name)) router.addRoute(v);
+          const flattenRouters: any = router
+            .getRoutes()
+            .find(n => n.path === "/");
+          router.addRoute(flattenRouters);
         }
         resolve(router);
-      });
+      })
       usePermissionStoreHook().changeSetting(info);
     }
     addPathMatch();

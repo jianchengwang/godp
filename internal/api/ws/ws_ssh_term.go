@@ -5,12 +5,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"godp/internal/db"
-	"godp/internal/pojo"
-	"godp/pkg/helper"
+	"godp/pkg/api/helper"
 	sshHelper "godp/pkg/ssh"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -43,32 +41,18 @@ func WsSsh(c *gin.Context) {
 	if helper.WsHandleError(wsConn, err) {
 		return
 	}
-	projectId, err := strconv.Atoi(c.Query("projectId"))
+	host := c.Query("host")
+	err, assetsHost := db.AssetsHostDb.GetByIP(host)
 	if helper.WsHandleError(wsConn, err) {
 		return
 	}
-	host := c.DefaultQuery("host", "127.0.0.1")
-
-	err, projectInfo := db.ProjectInfoDb.GetById(uint(projectId))
-	if helper.WsHandleError(wsConn, err) {
-		return
-	}
-	var ipAddress pojo.IpAddressStruct
-	if host == projectInfo.ProjectConfig.CI.IP {
-		ipAddress = projectInfo.ProjectConfig.CI
-	} else {
-		err, ipAddress = pojo.FindIpAddressByIp(projectInfo.ProjectConfig.IPAddressArr, host)
-		if helper.WsHandleError(wsConn, err) {
-			return
-		}
-	}
-	port := ipAddress.Port
-	user := ipAddress.User
-	pass := ipAddress.Password
+	port := assetsHost.Port
+	user := assetsHost.User
+	pass := assetsHost.Password
 
 	err, ssConn := sshHelper.GetConnection(sshHelper.ConnectionInfo{Host: host, Port: port, User: user, Pass: pass})
 	if helper.WsHandleError(wsConn, err) {
-		log.Println("创建ssh connection 失败", err)
+		log.Println("create ssh connection failed", err)
 		return
 	}
 	defer ssConn.Close()
@@ -76,7 +60,7 @@ func WsSsh(c *gin.Context) {
 	if strings.HasPrefix(sessionId, "sftp-") {
 		err, sftpClient := sshHelper.GetSftpClient(ssConn)
 		if helper.WsHandleError(wsConn, err) {
-			log.Println("创建sftp connection 失败", err)
+			log.Println("create sftp connection failed", err)
 			return
 		}
 		defer sftpClient.Close()

@@ -1,6 +1,6 @@
 package types
 
-import "godp/pkg/page"
+import "godp/pkg/api/page"
 
 type ProjectQueryParam struct {
 	page.PageInfo

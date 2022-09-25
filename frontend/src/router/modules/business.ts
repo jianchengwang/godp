@@ -1,43 +1,21 @@
-const projectRouter = {
-  path: "/project",
-  name: "project",
-  redirect: "/project/index",
+const assetsHostRouter = {
+  path: "/assetsHost",
+  name: "assetsHost",
+  redirect: "/assetsHost/index",
   meta: {
-    title: "项目管理",
+    title: "主机管理",
     icon: "histogram",
-    showLink: true,
     rank: 1
   },
   children: [
     {
-      path: "/project/index",
-      name: "projectIndex",
+      path: "/assetsHost/index",
+      name: "assetsHostIndex",
       meta: {
-        title: "项目管理",
-        showLink: true
-      }
-    },
-    {
-      path: "/project/edit",
-      name: "projectEdit",
-      meta: {
-        title: "",
-        showLink: false,
-        dynamicLevel: 3,
-        refreshRedirect: "/project/index"
-      }
-    },
-    {
-      path: "/project/config",
-      name: "projectConfig",
-      meta: {
-        title: "",
-        showLink: false,
-        dynamicLevel: 3,
-        refreshRedirect: "/project/index"
-      }
+        title: "主机管理"
+      },
     }
   ]
 };
 
-export { projectRouter };
+export { assetsHostRouter };

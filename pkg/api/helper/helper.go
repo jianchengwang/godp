@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
-	"godp/pkg/response"
+	"godp/pkg/api/response"
 	"time"
 )
 

@@ -6,12 +6,12 @@ import { getServerConfig } from "./config";
 import { createApp, Directive } from "vue";
 import { useI18n } from "../src/plugins/i18n";
 import { MotionPlugin } from "@vueuse/motion";
-// import { useEcharts } from "/@/plugins/echarts";
-// import { useTable } from "../src/plugins/vxe-table";
+import { useEcharts } from "/@/plugins/echarts";
+import { useTable } from "../src/plugins/vxe-table";
 import { injectResponsiveStorage } from "/@/utils/responsive";
 
-// import Table from "@pureadmin/table";
-// import PureDescriptions from "@pureadmin/descriptions";
+import Table from "@pureadmin/table";
+import PureDescriptions from "@pureadmin/descriptions";
 
 import "animate.css";
 // 引入重置样式
@@ -49,10 +49,10 @@ getServerConfig(app).then(async config => {
   await router.isReady();
   injectResponsiveStorage(app, config);
   setupStore(app);
-  app.use(MotionPlugin).use(useI18n).use(ElementPlus);
-  // .use(useEcharts);
-  // .use(Table);
-  // .use(PureDescriptions);
-  // .use(useTable);
+  app.use(MotionPlugin).use(useI18n).use(ElementPlus)
+    .use(useEcharts)
+    .use(Table)
+    .use(PureDescriptions)
+    .use(useTable);
   app.mount("#app");
 });

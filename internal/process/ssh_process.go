@@ -1,35 +1,36 @@
 package process
 
 import (
-	"fmt"
-	"godp/internal/pojo"
+	"godp/internal/db"
 	"godp/pkg/errorcode"
-	"godp/pkg/ssh"
+	sshHelper "godp/pkg/ssh"
 	"net"
 	"strings"
 )
 
-func GetIntranetIp(projectConfig pojo.ProjectConfig, host string) (error, string) {
-	err, ipAddress, sshClient, sftpClient, _ := PreGetInfo(projectConfig, host)
-	if err != nil {
-		return err, ""
+func GetIntranetIp(assetsHost db.AssetsHost) (error, string) {
+
+	connectionInfo := sshHelper.ConnectionInfo{
+		Host: assetsHost.IP,
+		Port: assetsHost.Port,
+		User: assetsHost.User,
+		Pass: assetsHost.Password,
 	}
-	fmt.Println(ipAddress)
+	err, sshClient := sshHelper.GetConnection(connectionInfo)
 	defer sshClient.Close()
-	defer sftpClient.Close()
 
 	session, err := sshClient.NewSession()
 	if err != nil {
 		return err, ""
 	}
-	err, combo := ssh.ExecuteCmd(session, "ifconfig eth0 | grep \"inet \" | awk '{print $2}' | cut -c 1-")
+	err, combo := sshHelper.ExecuteCmd(session, "ifconfig eth0 | grep \"inet \" | awk '{print $2}' | cut -c 1-")
 	if err != nil {
 		return err, ""
 	}
 	ipv4 := strings.Replace(combo, "\n", "", -1)
 	address := net.ParseIP(ipv4)
 	if address == nil {
-		return errorcode.NewError(500, "ip地址不合法"), ""
+		return errorcode.NewError(500, "ip address error"), ""
 	} else {
 		return nil, address.String()
 	}

@@ -9,9 +9,9 @@ import (
 )
 
 type BaseModel struct {
-	ID        uint `json:"id" gorm:"primarykey"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID        uint           `json:"id" gorm:"primarykey"`
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `json:"deletedAt" gorm:"index"`
 }
 
@@ -34,6 +34,7 @@ func InitDB() *gorm.DB {
 	_ = db.AutoMigrate(
 		&SysUser{},
 		&SysRole{},
+		&AssetsHost{},
 	)
 	return db
 }

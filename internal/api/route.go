@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"godp/internal/api/auth"
 	"godp/internal/api/middleware"
-	project "godp/internal/api/project"
 	ws "godp/internal/api/ws"
 )
 
@@ -22,7 +21,6 @@ func InitRoute() *gin.Engine {
 	}
 	v1.Use(middleware.JWT())
 
-	project.UseProjectRouter(v1)
 	ws.UseWsSshRouter(v1)
 
 	// docs

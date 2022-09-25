@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"godp/internal/api/types"
 	"godp/internal/db"
+	"godp/pkg/api/response"
 	"godp/pkg/errorcode"
 	"godp/pkg/permission"
-	"godp/pkg/response"
 	"gorm.io/gorm"
 )
 
@@ -68,7 +68,7 @@ func Register(c *gin.Context) {
 
 	err, _ = db.SysUserDb.GetByUsername(username)
 	if err == nil {
-		response.ErrorCustom(c, errorcode.ErrInvalidParam.Code(), "用户名已经存在")
+		response.ErrorCustom(c, errorcode.ErrInvalidParam.Code(), "username existed.")
 	} else if err == gorm.ErrRecordNotFound {
 		passwordHash, err := permission.PasswordHash(password)
 		if err != nil {
