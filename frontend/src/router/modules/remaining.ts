@@ -29,6 +29,16 @@ const remainingRouter: Array<RouteConfigsTable> = [
         component: () => import("/@/layout/redirect.vue")
       }
     ]
+  },
+  {
+    path: "/ssh",
+    name: "SSH",
+    component: () => import("/@/views/ssh/index.vue"),
+    meta: {
+      title: "web终端",
+      showLink: false,
+      rank: 200
+    }
   }
 ];
 

@@ -5,34 +5,33 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { loadEnv } from "@build/index";
-import { ref, reactive } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { ref, reactive, toRaw } from "vue";
 import {
   VXETable,
   VxeGridInstance,
   VxeGridProps,
   VxeGridListeners
 } from "vxe-table";
-import { useMultiTagsStoreHook } from "/@/store/modules/multiTags";
+
+import { ElMessage } from "element-plus";
+import type { ElForm } from "element-plus";
 
 import {
   assetsHostPage,
   assetsHostGet,
-  assetsHostDelete
+  assetsHostDelete,
+  assetsHostPost,
+  assetsHostPut
 } from "/@/api/assetsHost";
 
-const route = useRoute();
-const router = useRouter();
 const xGrid = ref({} as VxeGridInstance);
 
-let searchParam = reactive({});
 const buttons = [
   {
     name: "创建主机",
     status: "perfect",
     icon: "vxe-icon--plus",
-    code: "toEdit"
+    code: "showForm"
   }
 ];
 const gridOptions = reactive({
@@ -56,10 +55,10 @@ const gridOptions = reactive({
     items: [
       { field: "q", title: "", itemRender: {}, slots: { default: "q_item" } },
       {
-        field: "internal",
+        field: "verified",
         title: "",
         itemRender: {},
-        slots: { default: "internal_item" }
+        slots: { default: "verified_item" }
       },
       { itemRender: {}, slots: { default: "submit_item" } },
       { itemRender: {}, slots: { default: "reset_item" } }
@@ -94,7 +93,6 @@ const gridOptions = reactive({
     ajax: {
       // 接收 Promise
       query: ({ page, sorts, form }) => {
-        searchParam = Object.assign({}, form);
         const queryParams: any = Object.assign({}, form);
 
         // 处理分页数据
@@ -151,8 +149,8 @@ const gridEvents: VxeGridListeners = reactive({
   toolbarButtonClick({ code }) {
     const $grid = xGrid.value;
     switch (code) {
-      case "toEdit": {
-        toEditEvent(0);
+      case "showForm": {
+        showFormEvent(0);
         break;
       }
     }
@@ -162,31 +160,61 @@ const gridEvents: VxeGridListeners = reactive({
   }
 } as VxeGridListeners);
 
-const toEditEvent = (rowId: number) => {
-  // router.push("/project/edit?id=" + rowId);
-  let title = "创建项目";
-  if (rowId > 0) {
-    title = `项目基础信息 - ID.${rowId}`;
-  }
-  useMultiTagsStoreHook().handleTags("push", {
-    path: `/project/edit`,
-    parentPath: route.matched[0].path,
-    name: "projectEdit",
-    query: { id: String(rowId) },
-    meta: {
-      title: title,
-      showLink: false,
-      dynamicLevel: 3
-    }
-  });
-  router.push({ name: "projectEdit", query: { id: String(rowId) } });
-};
-
 const deleteEvent = async (id: number) => {
   const type = await VXETable.modal.confirm("您确认删除此主机吗？");
   if (type === "confirm") {
     assetsHostDelete(id).then(() => {
       VXETable.modal.message({ content: "已删除", status: "success" });
+      xGrid.value.commitProxy("reload");
+    });
+  }
+};
+
+const formRef = ref<InstanceType<typeof ElForm>>();
+const showForm = ref(false);
+const formId = ref(0);
+const emptyForm = {
+  id: 0,
+  name: "",
+  cloudVendor: "None",
+  ip: "127.0.0.1",
+  port: 22,
+  user: "root",
+  password: "",
+  remark: "",
+  workDir: "/root/godp"
+};
+const formObj = reactive(Object.assign({}, emptyForm));
+const showFormEvent = (rowId: number) => {
+  formId.value = rowId;
+  if (formId.value > 0) {
+    assetsHostGet(formId.value).then(({ data }) => {
+      Object.assign(formObj, data);
+    });
+  } else {
+    Object.assign(formObj, emptyForm);
+  }
+  showForm.value = true;
+};
+
+const cancelFormEvent = () => {
+  showForm.value = false;
+  formId.value = 0;
+  Object.assign(formObj, emptyForm);
+};
+
+const confirmFormEvent = () => {
+  if (formId.value) {
+    assetsHostPut(formId.value, toRaw(formObj)).then(() => {
+      ElMessage.success("保存成功");
+      xGrid.value.commitProxy("reload");
+      cancelFormEvent();
+      xGrid.value.commitProxy("reload");
+    });
+  } else {
+    assetsHostPost(toRaw(formObj)).then(() => {
+      ElMessage.success("保存成功");
+      cancelFormEvent();
       xGrid.value.commitProxy("reload");
     });
   }
@@ -202,19 +230,19 @@ const deleteEvent = async (id: number) => {
           v-model="data.q"
           type="text"
           placeholder="输入名称/IP检索"
-        ></vxe-input>
+        />
       </template>
       <template #verified_item="{ data }">
         <vxe-select v-model="data.verified" placeholder="是否验证" clearable>
-          <vxe-option value="1" label="是"></vxe-option>
-          <vxe-option value="0" label="否"></vxe-option>
+          <vxe-option value="1" label="是" />
+          <vxe-option value="2" label="否" />
         </vxe-select>
       </template>
       <template #submit_item>
-        <vxe-button type="submit" status="primary" content="查询"></vxe-button>
+        <vxe-button type="submit" status="primary" content="查询" />
       </template>
       <template #reset_item>
-        <vxe-button type="reset" content="重置"></vxe-button>
+        <vxe-button type="reset" content="重置" />
       </template>
 
       <template #opt_field="{ row }">
@@ -222,19 +250,61 @@ const deleteEvent = async (id: number) => {
           status="primary"
           type="text"
           content="编辑"
-          @click="toEditEvent(row.id)"
-        ></vxe-button>
+          @click="showFormEvent(row.id)"
+        />
         <vxe-button
-          v-if="row.id === 0"
           status="danger"
           type="text"
           content="删除"
           @click="deleteEvent(row.id)"
-        ></vxe-button>
+        />
       </template>
     </vxe-grid>
+    <el-drawer v-model="showForm" direction="rtl">
+      <template #title>
+        <h4>{{ formId > 0 ? "编辑主机" : "新建主机" }}</h4>
+      </template>
+      <template #default>
+        <el-form ref="formRef" :model="formObj" label-width="120px">
+          <el-form-item label="名称">
+            <el-input v-model="formObj.name" clearable />
+          </el-form-item>
+          <el-form-item label="云厂商">
+            <el-select
+              v-model="formObj.cloudVendor"
+              placeholder="请选择云厂商"
+              clearable
+            >
+              <el-option label="None" value="None" />
+              <el-option label="Aliyun" value="Aliyun" />
+              <el-option label="Tencent" value="Tencent" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="ip地址">
+            <el-input v-model="formObj.ip" clearable />
+          </el-form-item>
+          <el-form-item label="端口">
+            <el-input v-model.number="formObj.port" clearable />
+          </el-form-item>
+          <el-form-item label="用户">
+            <el-input v-model="formObj.user" clearable />
+          </el-form-item>
+          <el-form-item label="密码">
+            <el-input v-model="formObj.password" show-password clearable />
+          </el-form-item>
+          <el-form-item label="备注">
+            <el-input type="textarea" v-model="formObj.remark" clearable />
+          </el-form-item>
+        </el-form>
+      </template>
+      <template #footer>
+        <div style="flex: auto">
+          <el-button @click="cancelFormEvent">取消</el-button>
+          <el-button type="primary" @click="confirmFormEvent">确定</el-button>
+        </div>
+      </template>
+    </el-drawer>
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

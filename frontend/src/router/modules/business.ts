@@ -13,7 +13,7 @@ const assetsHostRouter = {
       name: "assetsHostIndex",
       meta: {
         title: "主机管理"
-      },
+      }
     }
   ]
 };

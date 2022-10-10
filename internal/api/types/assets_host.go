@@ -21,5 +21,5 @@ type AssetsHostQueryParam struct {
 	page.PageInfo
 	Q        string `form:"q"`
 	UserId   uint   `form:"userId"`
-	Verified bool   `form:"verified"`
+	Verified int    `form:"verified"`
 }

@@ -38,7 +38,8 @@ func (AssetsHostDb *AssetsHostDbStruct) Page(param types.AssetsHostQueryParam) (
 			db.Where("ip LIKE ?", "%"+param.Q+"%"),
 		)
 	}
-	if param.Verified {
+
+	if param.Verified > 0 {
 		db.Where("verified = ?", param.Verified)
 	}
 
@@ -49,13 +50,24 @@ func (AssetsHostDb *AssetsHostDbStruct) Page(param types.AssetsHostQueryParam) (
 		db = db.Limit(limit).Offset(offset).Order("id desc")
 		err = db.Find(&objList).Error
 	}
+
+	// set empty password
+	for i := 0; i < len(objList); i++ {
+		objList[i].Password = ""
+	}
+
 	return err, objList, total
 }
 
-func (AssetsHostDb *AssetsHostDbStruct) GetByIP(ip string) (error, *AssetsHost) {
+func (AssetsHostDb *AssetsHostDbStruct) GetByIP(ip string, id uint) (error, *AssetsHost) {
 	var getObj = &AssetsHost{}
-	err := global.DB.Where("ip = ?", ip).First(getObj).Error
-	return err, getObj
+	if id > 0 {
+		err := global.DB.Where("ip = ? and id != ?", ip, id).First(&getObj).Error
+		return err, getObj
+	} else {
+		err := global.DB.Where("project_app = ?", ip).First(&getObj).Error
+		return err, getObj
+	}
 }
 
 func (AssetsHostDb *AssetsHostDbStruct) GetById(id uint) (error, *AssetsHost) {
@@ -87,4 +99,8 @@ func (AssetsHostDb *AssetsHostDbStruct) SaveOrUpdate(updateParam AssetsHost) err
 		).Error
 		return err
 	}
+}
+
+func (AssetsHostDb *AssetsHostDbStruct) DeleteById(id uint) error {
+	return global.DB.Delete(&AssetsHost{}, id).Error
 }

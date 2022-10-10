@@ -42,7 +42,7 @@ func WsSsh(c *gin.Context) {
 		return
 	}
 	host := c.Query("host")
-	err, assetsHost := db.AssetsHostDb.GetByIP(host)
+	err, assetsHost := db.AssetsHostDb.GetByIP(host, 0)
 	if helper.WsHandleError(wsConn, err) {
 		return
 	}
