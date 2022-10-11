@@ -22,15 +22,15 @@ import { WebLinksAddon } from "xterm-addon-web-links";
 const { VITE_PROXY_DOMAIN_REAL } = loadEnv();
 
 const props = defineProps({
-  projectId: Number,
   host: String,
-  sessionId: String
+  sessionId: String,
+  cardLayout: Boolean
 });
 const emit = defineEmits(["clear-event"]);
 
 let wsUrl = computed(() => {
   return (
-    `ws://localhost:8081/api/ws/ssh/ssh-${props.sessionId}?projectId=${props.projectId}&host=${props.host}&Authorization=` +
+    `ws://localhost:8081/api/v1/ws/ssh/ssh-${props.sessionId}?host=${props.host}&Authorization=` +
     getAccessToken()
   );
 });
@@ -76,7 +76,7 @@ themeMap.set("Material", Material);
 const xtermConfig = reactive({
   term: null,
   ws: null,
-  rows: 40,
+  rows: 41,
   cols: 80,
   heartBeatTimer: null,
   cmdBuffer: ""
@@ -145,7 +145,7 @@ const runFakeTerminal = function () {
   if (xtermConfig.term._initialized) return;
   // 初始化
   xtermConfig.term._initialized = true;
-  xtermConfig.term.writeln("Welcome to \x1b[1;32mNFTDP\x1b[0m.");
+  xtermConfig.term.writeln("Welcome to \x1b[1;32mGODP\x1b[0m.");
   xtermConfig.term.writeln("connecting to " + props.host + "....");
   // 添加事件监听器，支持输入方法
   xtermConfig.term.onKey(e => {
@@ -247,27 +247,37 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div>
-    <!-- <div class="card-header">
-      <div>
-      </div>
-      <div class="card-header" style="margin-right: 20px;">
-        <el-select v-model="xtermThemeLabel" class="m-2" placeholder="主题选择" @change="changeTheme">
-          <el-option v-for="item in themeOptions" :key="item.label" :label="item.label" :value="item.label" />
-        </el-select>
-        <div>
-          <el-icon :size="24" @click="doOpen">
-            <refresh-left />
-          </el-icon>
-          <el-icon :size="24" @click="doFullscreen">
-            <full-screen />
-          </el-icon>
+  <el-card class="box-card" v-if="props.cardLayout">
+    <template #header>
+      <div class="card-header">
+        <span>命令终端</span>
+        <div style="display: flex; align-items: center">
+          <el-select
+            v-model="xtermThemeLabel"
+            class="m-2"
+            placeholder="主题选择"
+            @change="changeTheme"
+          >
+            <el-option
+              v-for="item in themeOptions"
+              :key="item.label"
+              :label="item.label"
+              :value="item.label"
+            />
+          </el-select>
+          <!-- <span @click="doOpen"
+              ><IconifyIconOffline icon="refresh-right"
+            /></span>
+            <span @click="doOpen"
+              ><IconifyIconOffline icon="full-screen"
+            /></span> -->
+          <el-button class="button" text>文件管理</el-button>
         </div>
       </div>
-    </div> -->
+    </template>
     <div :id="'ssh-' + props.sessionId" />
-    -->
-  </div>
+  </el-card>
+  <div v-else :id="'ssh-' + props.sessionId" />
 </template>
 
 <style scoped>
@@ -275,5 +285,10 @@ onUnmounted(() => {
   margin-left: 10px;
   cursor: pointer;
   color: var(--el-color-primary);
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

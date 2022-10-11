@@ -43,6 +43,7 @@
     "element-plus": "^2.2.16",
     "element-resize-detector": "^1.2.3",
     "js-cookie": "^3.0.1",
+    "js-base64": "^3.7.2",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
     "lodash-unified": "^1.0.2",

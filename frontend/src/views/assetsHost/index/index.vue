@@ -6,6 +6,8 @@ export default {
 
 <script setup lang="ts">
 import { ref, reactive, toRaw } from "vue";
+import { useRouter } from "vue-router";
+
 import {
   VXETable,
   VxeGridInstance,
@@ -61,7 +63,8 @@ const gridOptions = reactive({
         slots: { default: "verified_item" }
       },
       { itemRender: {}, slots: { default: "submit_item" } },
-      { itemRender: {}, slots: { default: "reset_item" } }
+      { itemRender: {}, slots: { default: "reset_item" } },
+      { itemRender: {}, slots: { default: "webterminal_item" } }
     ]
   },
   toolbarConfig: {
@@ -219,6 +222,15 @@ const confirmFormEvent = () => {
     });
   }
 };
+
+const router = useRouter();
+const sshHref = router.resolve({
+  name: "ssh",
+  path: "/ssh"
+});
+const openWebTerminal = () => {
+  window.open(sshHref.href, "_blank");
+};
 </script>
 
 <template>
@@ -243,6 +255,13 @@ const confirmFormEvent = () => {
       </template>
       <template #reset_item>
         <vxe-button type="reset" content="重置" />
+      </template>
+      <template #webterminal_item>
+        <vxe-button
+          @click="openWebTerminal"
+          status="primary"
+          content="Web终端"
+        />
       </template>
 
       <template #opt_field="{ row }">

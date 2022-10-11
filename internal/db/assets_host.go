@@ -65,7 +65,7 @@ func (AssetsHostDb *AssetsHostDbStruct) GetByIP(ip string, id uint) (error, *Ass
 		err := global.DB.Where("ip = ? and id != ?", ip, id).First(&getObj).Error
 		return err, getObj
 	} else {
-		err := global.DB.Where("project_app = ?", ip).First(&getObj).Error
+		err := global.DB.Where("ip = ?", ip).First(&getObj).Error
 		return err, getObj
 	}
 }

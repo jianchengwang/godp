@@ -29,8 +29,8 @@ export function setToken(data) {
   useUserStoreHook().SET_NAME(name);
   expires > 0
     ? Cookies.set(TokenKey, dataString, {
-        expires: expires / 86400000
-      })
+      expires: expires / 86400000
+    })
     : Cookies.set(TokenKey, dataString);
   sessionStorage.setItem(TokenKey, dataString);
 }
@@ -39,4 +39,13 @@ export function setToken(data) {
 export function removeToken() {
   Cookies.remove(TokenKey);
   sessionStorage.removeItem(TokenKey);
+}
+
+export function getAccessToken() {
+  const token = getToken();
+  if (token) {
+    const tokenJson = JSON.parse(token);
+    return tokenJson.accessToken;
+  }
+  return "";
 }

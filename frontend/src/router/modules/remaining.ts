@@ -32,7 +32,7 @@ const remainingRouter: Array<RouteConfigsTable> = [
   },
   {
     path: "/ssh",
-    name: "SSH",
+    name: "ssh",
     component: () => import("/@/views/ssh/index.vue"),
     meta: {
       title: "web终端",

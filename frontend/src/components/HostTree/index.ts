@@ -1,12 +1,12 @@
 import { App, defineComponent } from "vue";
-import projectHostTree from "./src/HostTree.vue";
+import hostTree from "./src/HostTree.vue";
 
-export const ProjectHostTree = Object.assign(projectHostTree, {
+export const HostTree = Object.assign(hostTree, {
   install(app: App) {
-    app.component(projectHostTree.name, ProjectHostTree);
+    app.component(hostTree.name, HostTree);
   }
 });
 
 export default {
-  ProjectHostTree
+  HostTree
 };

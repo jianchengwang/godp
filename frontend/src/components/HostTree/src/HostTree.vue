@@ -36,40 +36,32 @@ const filterMethod = (query: string, node: TreeNode) => {
 
 const nodeClickEvent = function (data, node, e) {
   if (node.parent) {
-    let type = node.data.type;
-    let projectId = node.parent.key;
-    let host = node.key;
-    let projectNmame = node.parent.label;
-    let projectApp = node.parent.data.code;
-    emit("click-event", type, projectId, host, projectNmame, projectApp);
+    let id = node.key;
+    let host = node.label;
+    let name = node.parent.name;
+    emit("click-event", id, host, name);
   }
 };
 
 onMounted(() => {
   assetsHostPage({ curPage: 1, limit: 10000 }).then(({ data }) => {
     var menusArr = [];
-    for (let i = 0; i < data.list.length; i++) {
-      let hostObj = data.list[i];
+    const cloudVendors = ["None", "Aliyun", "Tencent"];
+    for (let i = 0; i < cloudVendors.length; i++) {
       let menuObj = {
-        id: hostObj.id,
-        label: hostObj.name,
+        id: cloudVendors[i],
+        label: cloudVendors[i],
         children: []
       };
-      let projectConfig = hostObj.projectConfig;
-      // ci
-      menuObj.children.push({
-        id: projectConfig.ci.ip,
-        label: projectConfig.ci.ip,
-        type: "ci"
-      });
-      for (let j = 0; j < projectConfig.ip_address_arr.length; j++) {
-        if (projectConfig.ip_address_arr[j].ip) {
-          menuObj.children.push({
-            id: projectConfig.ip_address_arr[j].ip,
-            label: projectConfig.ip_address_arr[j].ip,
-            type: j == 0 ? "server" : "client"
-          });
-        }
+      let filterCloudVendors = data.list.filter(
+        item => item.cloudVendor == cloudVendors[i]
+      );
+      for (let i = 0; i < filterCloudVendors.length; i++) {
+        menuObj.children.push({
+          id: data.list[i].id,
+          label: data.list[i].ip,
+          name: data.list[i].name
+        });
       }
       menusArr.push(menuObj);
     }
@@ -100,10 +92,7 @@ onMounted(() => {
       <template #default="{ data }">
         <span
           >{{ data.label }}
-          <span v-if="data.type === 'ci'" style="color: #e6a23c">(ci)</span>
-          <span v-else-if="data.type === 'server'" style="color: #67c23a"
-            >(server)</span
-          >
+          <span v-if="data.name" style="color: #e6a23c">({{ data.name }})</span>
         </span>
       </template>
     </el-tree-v2>
