@@ -7,10 +7,10 @@ export default {
 <script setup lang="ts">
 import splitpane, { ContextProps } from "/@/components/ReSplitPane";
 import { ref, reactive, computed, onMounted } from "vue";
-import { HostTree } from "/@/components/HostTree";
-import { WebTerminal } from "/@/components/WebTerminal";
 import { buildUUID } from "/@/utils/uuid";
 import { ElMessage, ElNotification } from "element-plus";
+import { HostTree } from "/@/components/HostTree";
+import { WebTerminal } from "/@/components/WebTerminal";
 
 const settingLR: ContextProps = reactive({
   minPercent: 12,
@@ -18,15 +18,20 @@ const settingLR: ContextProps = reactive({
   split: "vertical"
 });
 
-const clickEvent = function (id, host, name) {
-  addSshTab(id, host, name);
+const clickEvent = function (id, host, hostName, hostRemark) {
+  addSshTab(id, host, hostName, hostRemark);
 };
 
 let tabIndex = 1;
 const sshTabsValue = ref("1");
 const sshTabs = ref([]);
 
-const addSshTab = (id: Number, host: string, name: string) => {
+const addSshTab = (
+  id: Number,
+  host: String,
+  hostName: String,
+  hostRemark: String
+) => {
   let sessionId = buildUUID();
   const newTabName = `ssh-${host}-${sessionId.slice(-4)}`;
   sshTabs.value.push({
@@ -34,7 +39,9 @@ const addSshTab = (id: Number, host: string, name: string) => {
     name: newTabName,
     id: id,
     host: host,
-    sessionId: sessionId
+    sessionId: sessionId,
+    hostName: hostName,
+    hostRemark: hostRemark
   });
   sshTabsValue.value = newTabName;
 };
@@ -91,6 +98,8 @@ const handleClick = (tab, event: Event) => {
                     :host="item.host"
                     :sessionId="item.sessionId"
                     :cardLayout="true"
+                    :hostName="item.hostName"
+                    :hostRemark="item.hostRemark"
                   />
                 </div>
               </el-tab-pane>
@@ -107,7 +116,7 @@ $W: 100%;
 $H: 95vh;
 
 .main {
-  background: #fff;
+  // background: #fff;
 }
 
 .split-pane {

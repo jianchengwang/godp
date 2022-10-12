@@ -87,12 +87,23 @@ func (sftpWs *LogicSftpWsSession) receiveWsMsg(exitCh chan bool) {
 				cmd := msgObj.Cmd
 				switch cmd {
 				case "list":
-					err, fileList := ListFiles(*sftpWs.sftpClient, remoteFilePath)
+					err, fileList := ListFiles(sftpWs.sftpClient, remoteFilePath)
 					if err != nil {
 						logrus.WithError(err).Error("websock list " + remoteFilePath + " failed")
 						continue
 					}
 					msgObj.Data = fileList
+				case "get":
+					err, fetchText := FetchText(sftpWs.sftpClient, remoteFilePath)
+					if err != nil {
+						logrus.WithError(err).Error("websock get " + remoteFilePath + " failed")
+						continue
+					}
+					msgObj.Data = fetchText
+				case "update":
+					continue
+				}
+				if err == nil {
 					combo, err := json.Marshal(msgObj)
 					if err != nil {
 						logrus.WithError(err).Error("sftp json combo output failed")
@@ -102,13 +113,7 @@ func (sftpWs *LogicSftpWsSession) receiveWsMsg(exitCh chan bool) {
 						logrus.WithError(err).Error("sftp sending combo output to webSocket failed")
 						continue
 					}
-				case "get":
-					continue
-				case "update":
-					continue
-
 				}
-
 			}
 		}
 	}

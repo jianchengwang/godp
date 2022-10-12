@@ -19,12 +19,16 @@ import { FitAddon } from "xterm-addon-fit";
 import { AttachAddon } from "xterm-addon-attach";
 import { WebLinksAddon } from "xterm-addon-web-links";
 
+import { WebSftp } from "/@/components/WebSftp";
+
 const { VITE_PROXY_DOMAIN_REAL } = loadEnv();
 
 const props = defineProps({
   host: String,
   sessionId: String,
-  cardLayout: Boolean
+  cardLayout: Boolean,
+  hostName: String,
+  hostRemark: String
 });
 const emit = defineEmits(["clear-event"]);
 
@@ -244,13 +248,22 @@ onUnmounted(() => {
     console.log(err.message);
   }
 });
+
+const showWebSftp = ref(false);
 </script>
 
 <template>
   <el-card class="box-card" v-if="props.cardLayout">
     <template #header>
       <div class="card-header">
-        <span>命令终端</span>
+        <div>
+          <span v-if="props.hostName" style="color: #e6a23c">{{
+            props.hostName
+          }}</span>
+          <span v-if="props.hostRemark" style="color: #409eff"
+            >: {{ props.hostRemark }}</span
+          >
+        </div>
         <div style="display: flex; align-items: center">
           <el-select
             v-model="xtermThemeLabel"
@@ -271,13 +284,34 @@ onUnmounted(() => {
             <span @click="doOpen"
               ><IconifyIconOffline icon="full-screen"
             /></span> -->
-          <el-button class="button" text>文件管理</el-button>
+          <el-button type="primary" @click="showWebSftp = true"
+            >文件管理</el-button
+          >
         </div>
       </div>
     </template>
     <div :id="'ssh-' + props.sessionId" />
   </el-card>
   <div v-else :id="'ssh-' + props.sessionId" />
+
+  <el-drawer
+    v-model="showWebSftp"
+    direction="rtl"
+    size="50%"
+    :with-header="false"
+  >
+    <template #title>
+      <h4>文件管理</h4>
+    </template>
+    <template #default>
+      <WebSftp
+        v-if="props.cardLayout"
+        :sessionId="props.sessionId"
+        :host="props.host"
+        workDir="/root"
+      />
+    </template>
+  </el-drawer>
 </template>
 
 <style scoped>

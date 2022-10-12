@@ -38,7 +38,7 @@ func Test(host string, port uint16, user string, pass string) {
 	defer conn.Close()
 	err, sc := GetSftpClient(conn)
 	defer sc.Close()
-	ListFiles(*sc, "docker-compose-sxl-test")
+	ListFiles(sc, "docker-compose-sxl-test")
 	fmt.Fprintf(os.Stdout, "\n")
 
 	session, err := conn.NewSession()
@@ -115,7 +115,7 @@ func ExecuteCmd(session *ssh.Session, cmd string) (error, string) {
 }
 
 // ListFiles 列出目录文件列表
-func ListFiles(sc sftp.Client, remoteDir string) (error, []SftpFileList) {
+func ListFiles(sc *sftp.Client, remoteDir string) (error, []SftpFileList) {
 
 	var fileList = make([]SftpFileList, 0)
 
@@ -140,7 +140,7 @@ func ListFiles(sc sftp.Client, remoteDir string) (error, []SftpFileList) {
 			size = "PRE"
 		}
 		// Output each file name and size in bytes
-		fmt.Fprintf(os.Stdout, "%19s %12s %s\n", modTime, size, name)
+		//fmt.Fprintf(os.Stdout, "%19s %12s %s\n", modTime, size, name)
 		fileList = append(fileList, SftpFileList{name, modTime, size})
 	}
 

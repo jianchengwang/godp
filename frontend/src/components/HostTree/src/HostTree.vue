@@ -38,8 +38,9 @@ const nodeClickEvent = function (data, node, e) {
   if (node.parent) {
     let id = node.key;
     let host = node.label;
-    let name = node.parent.name;
-    emit("click-event", id, host, name);
+    let hostName = data.name;
+    let hostRemark = data.remark;
+    emit("click-event", id, host, hostName, hostRemark);
   }
 };
 
@@ -60,7 +61,8 @@ onMounted(() => {
         menuObj.children.push({
           id: data.list[i].id,
           label: data.list[i].ip,
-          name: data.list[i].name
+          name: data.list[i].name,
+          remark: data.list[i].remark
         });
       }
       menusArr.push(menuObj);
