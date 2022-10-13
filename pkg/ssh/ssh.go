@@ -249,7 +249,12 @@ func FetchText(sftpClient *sftp.Client, remoteFile string) (error, string) {
 	}
 	defer srcFile.Close()
 
-	buffer := make([]byte, 10240)
+	fileInfo, err := srcFile.Stat()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to stat remote file: %v\n", err)
+		return err, ""
+	}
+	buffer := make([]byte, fileInfo.Size())
 	for {
 		_, err := srcFile.Read(buffer)
 		if err != nil {

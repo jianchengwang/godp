@@ -35,6 +35,7 @@ func InitDB() *gorm.DB {
 		&SysUser{},
 		&SysRole{},
 		&AssetsHost{},
+		&BatchScript{},
 	)
 	return db
 }

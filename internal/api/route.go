@@ -3,8 +3,9 @@ package api
 import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
-	assetsHost "godp/internal/api/assetsHost"
+	"godp/internal/api/assetsHost"
 	"godp/internal/api/auth"
+	"godp/internal/api/batchScript"
 	"godp/internal/api/middleware"
 	ws "godp/internal/api/ws"
 )
@@ -23,6 +24,7 @@ func InitRoute() *gin.Engine {
 	v1.Use(middleware.JWT())
 
 	assetsHost.UseAssetsHostRouter(v1)
+	batchScript.UseBatchScriptRouter(v1)
 	ws.UseWsSshRouter(v1)
 
 	// docs

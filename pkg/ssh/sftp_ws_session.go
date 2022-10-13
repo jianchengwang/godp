@@ -21,6 +21,7 @@ type SftpWsMsg struct {
 	RemoteFilePath string      `json:"remoteFilePath"`
 	UpdateString   string      `json:"updateString"`
 	Data           interface{} `json:"data"`
+	Success        bool        `json:"success"`
 }
 
 type LogicSftpWsSession struct {
@@ -85,25 +86,45 @@ func (sftpWs *LogicSftpWsSession) receiveWsMsg(exitCh chan bool) {
 				}
 				remoteFilePath := string(decodeBytes)
 				cmd := msgObj.Cmd
+				matchCmd := false
 				switch cmd {
 				case "list":
+					matchCmd = true
 					err, fileList := ListFiles(sftpWs.sftpClient, remoteFilePath)
 					if err != nil {
 						logrus.WithError(err).Error("websock list " + remoteFilePath + " failed")
-						continue
+						msgObj.Data = "websock list " + remoteFilePath + " failed"
+					} else {
+						msgObj.Data = fileList
+						msgObj.Success = true
 					}
-					msgObj.Data = fileList
-				case "get":
+				case "fetch":
+					matchCmd = true
 					err, fetchText := FetchText(sftpWs.sftpClient, remoteFilePath)
 					if err != nil {
-						logrus.WithError(err).Error("websock get " + remoteFilePath + " failed")
-						continue
+						logrus.WithError(err).Error("websock fetch " + remoteFilePath + " failed")
+						msgObj.Data = "websock fetch " + remoteFilePath + " failed"
+					} else {
+						msgObj.Data = fetchText
+						msgObj.Success = true
 					}
-					msgObj.Data = fetchText
 				case "update":
-					continue
+					matchCmd = true
+					decodeBytes, err := base64.StdEncoding.DecodeString(msgObj.UpdateString)
+					if err != nil {
+						logrus.WithError(err).Error("websock updateString string base64 decoding failed")
+						msgObj.Data = "websock fetch " + remoteFilePath + " failed"
+					} else {
+						updateString := string(decodeBytes)
+						err = UpdateText(sftpWs.sshClient, sftpWs.sftpClient, remoteFilePath, updateString)
+						if err != nil {
+							logrus.WithError(err).Error("websock update " + remoteFilePath + " failed")
+							msgObj.Data = "websock update " + remoteFilePath + " failed"
+						}
+					}
+					msgObj.Success = true
 				}
-				if err == nil {
+				if matchCmd {
 					combo, err := json.Marshal(msgObj)
 					if err != nil {
 						logrus.WithError(err).Error("sftp json combo output failed")
