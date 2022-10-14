@@ -17,6 +17,8 @@ import { CodemirrorCard } from "/@/components/CodemirrorCard";
 
 const { VITE_PROXY_DOMAIN_REAL } = loadEnv();
 
+import { wsSshDownloadFile, wsSshUploadFile } from "/@/api/ws";
+
 const props = defineProps({
   host: String,
   workDir: String,
@@ -188,13 +190,14 @@ const isAssetTypeText = ext => {
     ].indexOf(ext.toLowerCase()) !== -1
   );
 };
-const dbClickEvent = row => {
+const tableDbClickEvent = row => {
   let fileName = row.name;
   if (fileName.endsWith("/")) {
     sftpConfig.remoteFileDir =
       sftpConfig.remoteFileDir +
       "/" +
       fileName.substring(0, fileName.length - 1);
+    selectFileName.value = "";
     cmdListFile();
   } else {
     // if (isAssetTypeText(fileName.split(".").pop().toLowerCase())) {
@@ -230,6 +233,36 @@ const remoteFileList = computed(() => {
   }
   return [];
 });
+
+const selectFileName = ref("");
+const tableClickEvent = row => {
+  selectFileName.value = row.name;
+};
+
+const uploadFileHandler = e => {
+  let formData = new FormData();
+  formData.append("file", e.file);
+  formData.append("remoteFilePath", Base64.encode(sftpConfig.remoteFileDir));
+  wsSshUploadFile("sftp-" + props.sessionId, formData).then(() => {
+    ElMessage.success("上传成功");
+  });
+};
+
+const downloadFileHandler = () => {
+  let filename = selectFileName.value;
+  if (!filename) {
+    ElMessage.error("请选择文件");
+    return;
+  }
+  let remoteFilePath = Base64.encode(sftpConfig.remoteFileDir + "/" + filename);
+  wsSshDownloadFile(
+    "sftp-" + props.sessionId,
+    { remoteFilePath: remoteFilePath },
+    filename
+  ).then(() => {
+    ElMessage.success("正在下载");
+  });
+};
 </script>
 
 <template>
@@ -251,7 +284,23 @@ const remoteFileList = computed(() => {
         }}</el-link>
       </div>
 
-      <div>
+      <div style="display: flex; align-items: center">
+        <span class="el-icon" @click="cmdListFile"
+          ><IconifyIconOffline icon="refresh-right"
+        /></span>
+        <div style="display: flex; align-items: center; color: gray">
+          <span class="el-icon" @click="downloadFileHandler"
+            ><IconifyIconOffline icon="download" /></span
+          ><span v-if="selectFileName">({{ selectFileName }})</span>
+        </div>
+        <el-upload
+          action=""
+          :http-request="uploadFileHandler"
+          :show-file-list="false"
+        >
+          <span class="el-icon"><IconifyIconOffline icon="upload" /></span>
+        </el-upload>
+
         <el-select
           v-model="filterType"
           class="m-2"
@@ -278,7 +327,9 @@ const remoteFileList = computed(() => {
       stripe
       style="width: 100%"
       max-height="720"
-      @cell-dblclick="dbClickEvent"
+      @cell-dblclick="tableDbClickEvent"
+      @cell-click="tableClickEvent"
+      highlight-current-row
     >
       <el-table-column prop="name" label="名称" sortable />
       <el-table-column prop="size" label="大小" width="180" sortable />
@@ -313,7 +364,7 @@ const remoteFileList = computed(() => {
   align-items: center;
 }
 
-.el-icon-home {
+.el-icon {
   height: 48px;
   width: 38px;
   padding: 12px;

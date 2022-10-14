@@ -182,8 +182,8 @@ func UploadFile(sshClient *ssh.Client, sftpClient *sftp.Client, localFilePath st
 	}
 	defer srcFile.Close()
 	sftpClient.MkdirAll(remotePath)
-	remoteFileName := path.Base(localFilePath)
-	remotePath = path.Join(remotePath, remoteFileName)
+	remoteFileName := filepath.Base(localFilePath)
+	remotePath = filepath.Join(remotePath, remoteFileName)
 	dstFile, err := sftpClient.OpenFile(remotePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC)
 	if err != nil {
 		fmt.Println("sftpClient.Create error : ", remotePath)
@@ -219,7 +219,11 @@ func DownloadFile(sshClient *sftp.Client, remoteFile, localFile string) (err err
 		return
 	}
 	defer srcFile.Close()
-
+	err = os.MkdirAll(filepath.Dir(localFile), os.ModePerm)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to mkdir local file: %v\n", err)
+		return
+	}
 	dstFile, err := os.Create(localFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to open local file: %v\n", err)

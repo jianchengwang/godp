@@ -14,6 +14,8 @@ import Search from "@iconify-icons/ep/search";
 import FullScreen from "@iconify-icons/ep/full-screen";
 import Monitor from "@iconify-icons/ep/monitor";
 import Help from "@iconify-icons/ep/help";
+import Upload from "@iconify-icons/ep/upload";
+import Download from "@iconify-icons/ep/download";
 
 addIcon("check", Check);
 addIcon("home-filled", HomeFilled);
@@ -27,6 +29,8 @@ addIcon("search", Search);
 addIcon("full-screen", FullScreen);
 addIcon("monitor", Monitor);
 addIcon("help", Help);
+addIcon("upload", Upload);
+addIcon("download", Download);
 
 // remixicon
 import ArrowRightSLine from "@iconify-icons/ri/arrow-right-s-line";

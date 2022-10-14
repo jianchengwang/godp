@@ -11,6 +11,7 @@ type BatchScript struct {
 	Name    string `json:"name"`
 	Content string `json:"content"`
 	Remark  string `json:"remark"`
+	Example string `json:"example"`
 }
 
 type BatchScriptDbStruct struct{}
@@ -62,6 +63,7 @@ func (BatchScriptDb *BatchScriptDbStruct) SaveOrUpdate(updateParam BatchScript) 
 				Name:    updateParam.Name,
 				Content: updateParam.Content,
 				Remark:  updateParam.Remark,
+				Example: updateParam.Example,
 			},
 		).Error
 		return err

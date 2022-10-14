@@ -9,6 +9,7 @@ import (
 type appConfig struct {
 	CrossOrigin string `yaml:"cross_origin"mapstructure:"cross_origin"` // underscore need add mapstructure tag or cant unmarshal
 	WorkPath    string `yaml:"work_path"mapstructure:"work_path"`
+	TempPath    string `yaml:"temp_path"mapstructure:"temp_path"`
 }
 
 type mysqlConfig struct {

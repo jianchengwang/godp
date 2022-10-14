@@ -2,6 +2,7 @@
 app:
   cross_origin: "*"
   work_path: /etc/godp/work
+  temp_path: /etc/godp/temp
 
 mysql:
   host: 127.0.0.1

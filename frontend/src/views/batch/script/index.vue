@@ -113,8 +113,8 @@ const gridOptions = reactive({
       title: "文件名"
     },
     {
-      field: "remark",
-      title: "说明"
+      field: "example",
+      title: "示例"
     },
     {
       field: "createdAt",
@@ -162,7 +162,8 @@ const emptyForm = {
   name: "",
   content: "",
   args: "",
-  remark: ""
+  remark: "",
+  example: ""
 };
 const formObj = reactive(Object.assign({}, emptyForm));
 const showFormEvent = (rowId: number) => {
@@ -217,7 +218,7 @@ const editScript = () => {
 
 const updateText = (_filename, val) => {
   formObj.content = val;
-  ElMessage.error("已保存");
+  ElMessage.success("已保存");
 };
 
 const codemirrorOnCancel = () => {
@@ -229,83 +230,88 @@ const codemirrorOnCancel = () => {
 </script>
 
 <template>
-  <div class="main">
-    <vxe-grid ref="xGrid" v-bind="gridOptions" v-on="gridEvents">
-      <template #q_item="{ data }">
-        <vxe-input
-          style="margin-left: 5px; width: 305px"
-          v-model="data.q"
-          type="text"
-          placeholder="输入文件名检索"
-        />
-      </template>
-      <template #submit_item>
-        <vxe-button type="submit" status="primary" content="查询" />
-      </template>
-      <template #reset_item>
-        <vxe-button type="reset" content="重置" />
-      </template>
+  <div>
+    <div class="main">
+      <vxe-grid ref="xGrid" v-bind="gridOptions" v-on="gridEvents">
+        <template #q_item="{ data }">
+          <vxe-input
+            style="margin-left: 5px; width: 305px"
+            v-model="data.q"
+            type="text"
+            placeholder="输入文件名检索"
+          />
+        </template>
+        <template #submit_item>
+          <vxe-button type="submit" status="primary" content="查询" />
+        </template>
+        <template #reset_item>
+          <vxe-button type="reset" content="重置" />
+        </template>
 
-      <template #opt_field="{ row }">
-        <vxe-button
-          status="primary"
-          type="text"
-          content="编辑"
-          @click="showFormEvent(row.id)"
-        />
-        <vxe-button
-          status="danger"
-          type="text"
-          content="删除"
-          @click="deleteEvent(row.id)"
-        />
-      </template>
-    </vxe-grid>
-    <el-drawer v-model="showForm" direction="rtl">
-      <template #title>
-        <h4>{{ formId > 0 ? "编辑脚本" : "新建脚本" }}</h4>
-      </template>
-      <template #default>
-        <el-form ref="formRef" :model="formObj" label-width="120px">
-          <el-form-item label="文件名">
-            <el-input v-model="formObj.name" clearable />
-          </el-form-item>
-          <el-form-item label="帮助说明">
-            <el-input type="textarea" v-model="formObj.remark" clearable />
-          </el-form-item>
-          <el-form-item label="脚本内容">
-            <el-button @click="editScript">编辑</el-button>
-          </el-form-item>
-        </el-form>
-      </template>
-      <template #footer>
-        <div style="flex: auto">
-          <el-button @click="cancelFormEvent">取消</el-button>
-          <el-button type="primary" @click="confirmFormEvent">确定</el-button>
-        </div>
-      </template>
-    </el-drawer>
+        <template #opt_field="{ row }">
+          <vxe-button
+            status="primary"
+            type="text"
+            content="编辑"
+            @click="showFormEvent(row.id)"
+          />
+          <vxe-button
+            status="danger"
+            type="text"
+            content="删除"
+            @click="deleteEvent(row.id)"
+          />
+        </template>
+      </vxe-grid>
+      <el-drawer v-model="showForm" direction="rtl">
+        <template #title>
+          <h4>{{ formId > 0 ? "编辑脚本" : "新建脚本" }}</h4>
+        </template>
+        <template #default>
+          <el-form ref="formRef" :model="formObj" label-width="120px">
+            <el-form-item label="文件名">
+              <el-input v-model="formObj.name" clearable />
+            </el-form-item>
+            <el-form-item label="示例">
+              <el-input v-model="formObj.example" clearable />
+            </el-form-item>
+            <el-form-item label="备注说明">
+              <el-input type="textarea" v-model="formObj.remark" clearable />
+            </el-form-item>
+            <el-form-item label="脚本内容">
+              <el-button @click="editScript">编辑</el-button>
+            </el-form-item>
+          </el-form>
+        </template>
+        <template #footer>
+          <div style="flex: auto">
+            <el-button @click="cancelFormEvent">取消</el-button>
+            <el-button type="primary" @click="confirmFormEvent">确定</el-button>
+          </div>
+        </template>
+      </el-drawer>
+    </div>
+    <el-dialog
+      :showHeader="false"
+      v-if="codemirrorCardVisible"
+      v-model="codemirrorCardVisible"
+      width="80%"
+      show-zoom
+      resize
+      remember
+      fullscreen
+      :show-close="false"
+    >
+      <CodemirrorCard
+        :filename="propFilename"
+        :updateText="propUpdateString"
+        remark="备注：确认无误后请点击保存按钮"
+        @save-event="updateText"
+        @cancel-event="codemirrorOnCancel()"
+        style="margin-top: -40px"
+      />
+    </el-dialog>
   </div>
-  <el-dialog
-    :showHeader="false"
-    v-if="codemirrorCardVisible"
-    v-model="codemirrorCardVisible"
-    width="80%"
-    show-zoom
-    resize
-    remember
-    fullscreen
-    :show-close="false"
-  >
-    <CodemirrorCard
-      :filename="propFilename"
-      :updateText="propUpdateString"
-      remark="备注：确认无误后请点击保存按钮"
-      @save-event="updateText"
-      @cancel-event="codemirrorOnCancel()"
-      style="margin-top: -40px"
-    />
-  </el-dialog>
 </template>
 
 <style scoped></style>
